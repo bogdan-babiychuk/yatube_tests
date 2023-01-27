@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static%}
+{% load user_filters %}
+{% block title  %}
+{{ title }}
+{% endblock title  %}
+{% block content %}
+    {% if is_edit %}
+      Редактирование поста
+    {% endif %}
+  <h1>
+    {% if is_edit %}
+      Редактирование поста
+    {% else %}
+      Добавление нового поста
+    {% endif %}
+  </h1>
+  {% if is_edit %}
+    <form action="{% url 'posts:post_edit' post_id=form.instance.pk %}" method="post">
+  {% else %}
+    <form action="{% url 'posts:post_create' %}" method="post">
+  {% endif %}{% csrf_token %}      
+  <div class="card-body">
+    {% if form.errors %}
+      {% for field in form %} 
+        {% for error in field.errors %}            
+          <div class="alert alert-danger">
+            {{ error|escape }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ error|escape }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  <form method="post"
+    {% if action %}
+      action="{% url action_url %}"
+    {% endif %}>
+  {% for field in form %} 
+    <div class="form-group row my-3">
+      <label for="{{ field.id_for_label }}">
+        {{ field.label }}
+      {% if field.field.required %}
+        <span class="required text-danger">*</span>
+      {% endif %}
+      </label>
+      <div>
+        {{ field|addclass:'form-control' }} 
+        {% if field.help_text %}
+        <small 
+          id="{{ field.id_for_label }}-help"
+          class="form-text text-muted"
+        >
+          {{ field.help_text|safe }}
+        </small>
+      {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary" >
+    {% if is_edit %}
+      Сохранить изменения
+    {% else %}
+      Создать пост
+    {% endif %}
+  </button>
+    </div>
+  </form>
+  </div>
+</form>
+{% endblock %}
