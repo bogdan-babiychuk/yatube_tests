@@ -23,12 +23,10 @@ class PostModelTest(TestCase):
 
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
-        post = PostModelTest.post
-        group = PostModelTest.group
-        slovar = {
-            post: post.text,
-            group: group.title,
+        post_group = {
+            PostModelTest.post: PostModelTest.post.text,
+            PostModelTest.group: PostModelTest.group.title,
         }
-        for key, value in slovar.items():
+        for key, value in post_group.items():
             with self.subTest(key=key):
                 self.assertEqual(value, str(key))

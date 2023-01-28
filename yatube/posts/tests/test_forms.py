@@ -1,21 +1,14 @@
-import shutil
-import tempfile
+from http import HTTPStatus
 from django.shortcuts import get_object_or_404
-from posts.forms import PostForm
 from posts.models import Post, Group, User
-from django.conf import settings
-from django.test import Client, TestCase, override_settings
+from django.test import Client, TestCase
 from django.urls import reverse
 
-TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
-
-@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.guest_client = Client()
         cls.user = User.objects.create_user(username='wtf')
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
@@ -35,12 +28,9 @@ class PostFormTests(TestCase):
             author=cls.user,
             group=cls.group,
         )
-        cls.form = PostForm()
 
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+    def setUp(self):
+        self.guest_client = Client()
 
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
@@ -81,13 +71,13 @@ class PostFormTests(TestCase):
             follow=True
         )
         self.assertEqual(Post.objects.count(), tasks_count)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_edit_post(self):
         """Проверка формы редактирования поста"""
         form_data = {
             'text': 'Тестовый тест 2',
-            'group': PostFormTests.group_new.id
+            'group': self.group_new.id
         }
         response = self.authorized_client.post(
             reverse(
@@ -105,10 +95,10 @@ class PostFormTests(TestCase):
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый тест 2',
-                group=PostFormTests.group_new.id
+                group=self.group_new.id
             ).exists())
         self.assertFalse(
             Post.objects.filter(
                 text='Тестовый текст',
-                group=PostFormTests.group.id
+                group=self.group.id
             ).exists())

@@ -1,5 +1,4 @@
 from http import HTTPStatus
-
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.test import Client, TestCase
@@ -13,12 +12,11 @@ class PostURLTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.guest_client = Client()
         cls.user = User.objects.create_user(username='wtf')
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
 
-        group = Group.objects.create(
+        cls.group = Group.objects.create(
             title='test-Группа',
             slug='test-slug',
             description='test-описание группы'
@@ -26,19 +24,33 @@ class PostURLTest(TestCase):
         Post.objects.create(
             text='Тестовый текст',
             author=cls.user,
-            group=group,
+            group=cls.group,
         )
+        cls.url_public = [
+            '/',
+            '/group/test-slug/',
+            '/posts/1/',
+            '/profile/wtf/',
+        ]
+        cls.url_private = [
+            '/posts/1/edit'
+        ]
+
+        cls.url_authorized_client = [
+            '/',
+            '/group/test-slug/',
+            '/posts/1/',
+            '/profile/wtf/',
+            '/create/',
+        ]
+
+    def setUp(self):
+        self.guest_client = Client()
 
     def test_post_detail_url_exists_at_desired_location(self):
         """проверка доступности страниц любому пользователю."""
-        url_names = [
-            '/',
-            '/group/test-slug/',
-            '/profile/wtf/',
-            '/posts/1/',
-        ]
 
-        for url in url_names:
+        for url in self.url_public:
             with self.subTest(url=url):
                 response = self.guest_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -47,26 +59,15 @@ class PostURLTest(TestCase):
 
     def test_post_detail_url_exists_at_desired_location_authorized(self):
         """проверка доступности страниц авторизованному пользователю тоже."""
-        url_names = [
-            '/',
-            '/group/test-slug/',
-            '/posts/1/',
-            '/profile/wtf/',
-            '/create/',
 
-        ]
-        for url in url_names:
+        for url in self.url_authorized_client:
             with self.subTest(url=url):
                 response = self.authorized_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_home_url_exists_for_author(self):
         """проверка доступности страниц только автору."""
-        url_names = [
-            '/posts/1/edit',
-        ]
-
-        for url in url_names:
+        for url in self.url_private:
             with self.subTest(url=url):
                 post_user = get_object_or_404(User, username='wtf')
                 if post_user == self.authorized_client:
