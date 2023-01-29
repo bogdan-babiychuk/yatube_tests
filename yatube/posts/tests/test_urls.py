@@ -13,8 +13,6 @@ class PostURLTest(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='wtf')
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
 
         cls.group = Group.objects.create(
             title='test-Группа',
@@ -46,6 +44,8 @@ class PostURLTest(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
     def test_post_detail_url_exists_at_desired_location(self):
         """проверка доступности страниц любому пользователю."""

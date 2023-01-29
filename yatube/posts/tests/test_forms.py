@@ -10,8 +10,6 @@ class PostFormTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='wtf')
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
 
         cls.group = Group.objects.create(
             title='test-группа',
@@ -31,6 +29,8 @@ class PostFormTests(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
     def test_create_post(self):
         """Валидная форма создает запись в Post."""

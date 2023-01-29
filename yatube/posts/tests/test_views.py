@@ -11,8 +11,7 @@ class TestView(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='wtf')
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
+
         cls.group = Group.objects.create(
             title='test-группа',
             slug='test-slug',
@@ -26,6 +25,8 @@ class TestView(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
